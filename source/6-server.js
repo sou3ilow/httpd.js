@@ -7,6 +7,8 @@
 * support for HTTP error pages for various codes and fallback to HTTP 500 if
 * those codes fail for any reason.
 *
+* @class
+*
 * @param server : nsHttpServer
 *   the server in which this handler is being used
 */
@@ -366,7 +368,7 @@ ServerHandler.prototype =
     }
     else if (handler)
     {
-      dict[key] = createHandlerFunc(handler);
+      dict[key] = utils.createHandlerFunc(handler);
       log('[' + '_handlerToField' + '] ' + key +
           '=> createHanlder: handler<' + handler.name + '>');
     }
@@ -540,7 +542,7 @@ ServerHandler.prototype =
         <h1>404 Not Found</h1>\
         <p>\
         <span style="font-family: monospace;">' +
-        htmlEscape(metadata.path) +
+        utils.htmlEscape(metadata.path) +
         '</span> was not found.\
         </p>\
         </body>\

@@ -11,7 +11,6 @@
 * An implementation of an HTTP server.
 */
 
-/* global dump */
 /* jshint multistr: true */
 
 //'use strict';
@@ -75,8 +74,13 @@ var HTTP_404 = new HttpError(404, 'Not Found');
 var HTTP_500 = new HttpError(500, 'Internal Server Error');
 var HTTP_501 = new HttpError(501, 'Not Implemented');
 
+/**
+ * @namespace
+ */
+var utils = {}
+
 /** Creates a hash with fields corresponding to the values in arr. */
-function array2obj(arr)
+utils.array2obj = function(arr)
 {
   var obj = {};
   for (var i = 0; i < arr.length; i++)
@@ -98,7 +102,7 @@ function range(x, y)
 }
 
 /** An object (hash) whose fields are the numbers of all HTTP error codes. */
-const HTTP_ERROR_CODES = array2obj(range(400, 417).concat(range(500, 505)));
+const HTTP_ERROR_CODES = utils.array2obj(range(400, 417).concat(range(500, 505)));
 
 /** Base for relative timestamps produced by dumpn(). */
 var firstStamp = 0;
@@ -157,7 +161,7 @@ function log(msg)
 * @returns string
 *   the representation of the given date
 */
-function toDateString(date)
+utils.toDateString = function(date)
 {
   //
   // rfc1123-date = wkday ',' SP date1 SP time SP 'GMT'
@@ -239,7 +243,7 @@ function toDateString(date)
 * @returns boolean
 *   true if code is a CTL, false otherwise
 */
-function isCTL(code)
+utils.isCTL = function(code)
 {
   return (code >= 0 && code <= 31) || (code == 127);
 }
@@ -277,8 +281,10 @@ const IS_TOKEN_ARRAY =
 
 
 /**
-* A container for utility functions used with HTTP headers.
-*/
+ * 
+ * A container for utility functions used with HTTP headers.
+ * @namespace
+ */
 const headerUtils =
 {
   /**
@@ -286,9 +292,12 @@ const headerUtils =
   * valid header field name (although not necessarily one specified in RFC
   * 2616).
   *
-  * @throws NS_ERROR_INVALID_ARG
-  *   if fieldName does not match the field-name production in RFC 2616
-  * @returns string
+  * @memberof headerUtils
+  *
+  * @param {string} fieldName
+  *
+  * @throws if fieldName does not match the field-name production in RFC 2616
+  * @returns {string}
   *   fieldName converted to lowercase if it is a valid header, for characters
   *   where case conversion is possible
   */
@@ -317,11 +326,13 @@ const headerUtils =
   * part of the HTTP protocol), normalizes the value if it is, and
   * returns the normalized value.
   *
-  * @param fieldValue : string
+  * @memberof headerUtils
+  *
+  * @param {string} fieldValue
   *   a value to be normalized as an HTTP header field value
   * @throws NS_ERROR_INVALID_ARG
   *   if fieldValue does not match the field-value production in RFC 2616
-  * @returns string
+  * @returns {string}
   *   fieldValue as a normalized HTTP header field value
   */
   normalizeFieldValue: function(fieldValue)
@@ -351,7 +362,7 @@ const headerUtils =
     dumpn('*** Normalized value: \'' + val + '\'');
     for (var i = 0, len = val.length; i < len; i++)
     {
-      if (isCTL(val.charCodeAt(i)))
+      if (utils.isCTL(val.charCodeAt(i)))
       {
         throw 'normalizedFieldValue(): *** Char ' + i +
               ' has charcode ' + val.charCodeAt(i);

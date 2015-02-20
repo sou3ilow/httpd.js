@@ -1,26 +1,37 @@
-
 /**
 * Instantiates a new HTTP server.
+* @class
 */
 function HttpServer()
 {
-  /** The port on which this server listens. */
+  /** The port on which this server listens.
+   * @private
+   */
   this._port = undefined;
 
-  /** The host  **/
+  /** The host
+   * @private
+   */
   this._host = undefined;
 
-  /** The socket associated with this. */
+  /** The socket associated with this.
+   * @private
+   */
   this._socket = null;
 
-  /** The handler used to process requests to this server. */
+  /** The handler used to process requests to this server. 
+   * @private
+   */
   this._handler = new ServerHandler(this);
 
-  /** Naming information for this server. */
+  /** Naming information for this server. 
+   * @private
+   */
   this._identity = new ServerIdentity();
 
   /**
   * Indicates when the server is to be shut down at the end of the request.
+  * @private
   */
   this._doQuit = false;
 
@@ -29,18 +40,24 @@ function HttpServer()
 
 HttpServer.prototype =
 {
+
+  // originally implements:
   // NSISERVERSOCKETLISTENER
+  // NSIHTTPSERVER
 
   /**
-  * Processes an incoming request coming in on the given socket and contained
-  * in the given transport.
-  *
-  * @param socket : nsIServerSocket
-  *   the socket through which the request was served
-  * @param trans : nsISocketTransport
-  *   the transport for the request/response
-  * @see nsIServerSocketListener.onSocketAccepted
-  */
+   * Processes an incoming request coming in on the given socket and contained
+   * in the given transport.
+   *
+   * @memberof HttpServer
+   * @private
+   *
+   * @param socket : nsIServerSocket
+   *   the socket through which the request was served
+   * @param trans : nsISocketTransport
+   *   the transport for the request/response
+   * @see nsIServerSocketListener.onSocketAccepted
+   */
   _onSocketAccepted: function()
   {
     var that = this;
@@ -61,16 +78,18 @@ HttpServer.prototype =
     log('[' + '_onSocketAccepted' + '] ' +'End');
   },
 
-  // NSIHTTPSERVER
-
-  //
-  // see nsIHttpServer.start
-  //
+  /**
+   * Start the server
+   * @param {number} 
+   */
   start: function(port)
   {
     this._start(port, 'localhost');
   },
 
+  /**
+   * @private
+   */
   _start: function _start(port, host)
   {
     if (this._socket)
@@ -106,9 +125,10 @@ HttpServer.prototype =
     this._onSocketAccepted();
   },
 
-  //
-  // see nsIHttpServer.stop
-  //
+  /**
+   * Stop the server
+   * @param {function} callback
+   */
   stop: function HSstop(callback)
   {
     if (!callback)
@@ -134,12 +154,21 @@ HttpServer.prototype =
     // socket-close notification and pending request completion happen async
   },
 
-  //param: 'string' or 'function'
-  //       ->Set 'string' is 2nd arg for registerAppDirectory() or
-  //         registerSdcardDirectory().
-  //       ->Set 'function' is 2nd arg for registerPathHandler().
+  /**
+   * Register directory/handler for the sprcified path
+   * @memberof HttpServer
+   *
+   * @param {string} path 
+   * @param param if param is a string it is treated as a path of subdirectory.
+   *   if param is a function it is recognized as handler.
+   */
   get: function(path, param)
   {
+	  //param: 'string' or 'function'
+	  //       ->Set 'string' is 2nd arg for registerAppDirectory() or
+	  //         registerSdcardDirectory().
+	  //       ->Set 'function' is 2nd arg for registerPathHandler().
+
     if (path == null && param == null)
     {
       log('get() parameter error');
@@ -171,26 +200,38 @@ HttpServer.prototype =
       throw 'Cr.7777 NS_ERROR_INVALID_ARG';
     }
   },
-  
-  //
-  // see nsIHttpServer.registerAppDirectory
-  //
+ 
+  /**
+   * register subdirectry of app
+   * @memberof HttpServer
+   *
+   * @param {string} path
+   * @param {string} directory
+   */
   registerAppDirectory: function(path, directory)
   {
     this._handler.registerAppDirectory(path, directory);
   },
 
-  //
-  // see nsIHttpServer.registerSdcardDirectory
-  //
+  /**
+   * register subdirectory of sdcard
+   * @memberof HttpServer
+   *
+   * @param {string} path
+   * @param {string} directory
+   */
   registerSdcardDirectory: function(path, directory)
   {
     this._handler.registerSdcardDirectory(path, directory);
   },
 
-  //
-  // see nsIHttpServer.registerPathHandler
-  //
+  /**
+   * register a hanlder for the path
+   * @memberof HttpServer
+   *
+   * @param {string} path
+   * @param {string} hanlder(req, res, omcomplete)
+   */
   registerPathHandler: function registerPathHandler(path, handler)
   {
     log('[' + 'registerPathHandler' + '] ' +
@@ -198,25 +239,27 @@ HttpServer.prototype =
     this._handler.registerPathHandler(path, handler);
   },
 
-  //
-  // see nsIHttpServer.registerPrefixHandler
-  //
+  /**  
+   *   see nsIHttpServer.registerPrefixHandler
+   */
   registerPrefixHandler: function(prefix, handler)
   {
     this._handler.registerPrefixHandler(prefix, handler);
   },
 
-  //
-  // see nsIHttpServer.serverIdentity
-  //
+  /**
+   * see nsIHttpServer.serverIdentity
+   */
   get identity()
   {
     return this._identity;
   },
 
-  // PRIVATE IMPLEMENTATION
-
-  /** Calls the server-stopped callback provided when stop() was called. */
+  /**
+   * Calls the server-stopped callback provided when stop() was called.
+   * @memberof HttpServer
+   * @private
+   */
   _notifyStopped: function()
   {
     NS_ASSERT(this._stopCallback !== null, 'double-notifying?');
@@ -247,11 +290,12 @@ HttpServer.prototype =
   },
 
   /**
-  * Notifies this server that the given connection has been closed.
-  *
-  * @param connection : Connection
-  *   the connection that was closed
-  */
+   * Notifies this server that the given connection has been closed.
+   * @memberof HttpServer
+   * @private
+   * @param connection : Connection
+   *   the connection that was closed
+   */
   _connectionClosed: function(connection)
   {
     // Fire a pending server-stopped notification if it's our responsibility.
@@ -259,8 +303,10 @@ HttpServer.prototype =
   },
 
   /**
-  * Requests that the server be shut down when possible.
-  */
+   * Requests that the server be shut down when possible.
+   * @memberof HttpServer
+   * @private
+   */
   _requestQuit: function()
   {
     dumpn('>>> requesting a quit');
@@ -292,55 +338,73 @@ new RegExp('^(?:' +
 
 
 /**
-* Represents the identity of a server.  An identity consists of a set of
-* (scheme, host, port) tuples denoted as locations (allowing a single server to
-* serve multiple sites or to be used behind both HTTP and HTTPS proxies for any
-* host/port).  Any incoming request must be to one of these locations, or it
-* will be rejected with an HTTP 400 error.  One location, denoted as the
-* primary location, is the location assigned in contexts where a location
-* cannot otherwise be endogenously derived, such as for HTTP/1.0 requests.
-*
-* A single identity may contain at most one location per unique host/port pair;
-* other than that, no restrictions are placed upon what locations may
-* constitute an identity.
-*/
+ * Represents the identity of a server.  An identity consists of a set of
+ * (scheme, host, port) tuples denoted as locations (allowing a single server to
+ * serve multiple sites or to be used behind both HTTP and HTTPS proxies for any
+ * host/port).  Any incoming request must be to one of these locations, or it
+ * will be rejected with an HTTP 400 error.  One location, denoted as the
+ * primary location, is the location assigned in contexts where a location
+ * cannot otherwise be endogenously derived, such as for HTTP/1.0 requests.
+ *
+ * A single identity may contain at most one location per unique host/port pair;
+ * other than that, no restrictions are placed upon what locations may
+ * constitute an identity.
+ * @class
+ */
 function ServerIdentity()
 {
-  /** The scheme of the primary location. */
+  /**
+   * The scheme of the primary location.
+   * @memberof ServerIdentity
+   * @private
+   */
   this._primaryScheme = 'http';
 
-  /** The hostname of the primary location. */
+  /** The hostname of the primary location.
+   * @memberof ServerIdentity
+   * @private
+   */
   this._primaryHost = '127.0.0.1';
 
-  /** The port number of the primary location. */
+  /** The port number of the primary location.
+   * @memberof ServerIdentity
+   * @private
+   */
   this._primaryPort = -1;
 
   /**
-  * The current port number for the corresponding server, stored so that a new
-  * primary location can always be set if the current one is removed.
-  */
+   * The current port number for the corresponding server, stored so that a new
+   * primary location can always be set if the current one is removed.
+   * @memberof ServerIdentity
+   * @private
+   */
   this._defaultPort = -1;
 
   /**
-  * Maps hosts to maps of ports to schemes, e.g. the following would represent
-  * https://example.com:789/ and http://example.org/:
-  *
-  *   {
-  *     'xexample.com': { 789: 'https' },
-  *     'xexample.org': { 80: 'http' }
-  *   }
-  *
-  * Note the 'x' prefix on hostnames, which prevents collisions with special
-  * JS names like 'prototype'.
-  */
+   * Maps hosts to maps of ports to schemes, e.g. the following would represent
+   * https://example.com:789/ and http://example.org/:
+   *
+   *   {
+   *     'xexample.com': { 789: 'https' },
+   *     'xexample.org': { 80: 'http' }
+   *   }
+   *
+   * Note the 'x' prefix on hostnames, which prevents collisions with special
+   * JS names like 'prototype'.
+   * @memberof ServerIdentity
+   * @private
+   */
   this._locations = { 'xlocalhost': {} };
 }
 ServerIdentity.prototype =
 {
 
   // NSIHTTPSERVERIDENTITY
-  // see nsIHttpServerIdentity.add
-  //
+  
+  /**
+   * see nsIHttpServerIdentity.add
+   * @memberof ServerIdentity
+   */
   add: function(scheme, host, port)
   {
     this._validate(scheme, host, port);
@@ -354,9 +418,10 @@ ServerIdentity.prototype =
     entry[port] = scheme;
   },
 
-  //
-  // see nsIHttpServerIdentity.remove
-  //
+  /**
+   * see nsIHttpServerIdentity.remove
+   * @memberof ServerIdentity
+   */
   remove: function(scheme, host, port)
   {
     this._validate(scheme, host, port);
@@ -383,9 +448,10 @@ ServerIdentity.prototype =
 
     return present;
   },
-  //
-  // see nsIHttpServerIdentity.has
-  //
+  /**
+   * see nsIHttpServerIdentity.has
+   * @memberof ServerIdentity
+   */
   has: function(scheme, host, port)
   {
     this._validate(scheme, host, port);
@@ -394,9 +460,10 @@ ServerIdentity.prototype =
     scheme === this._locations['x' + host][port];
   },
 
-  //
-  // see nsIHttpServerIdentity.has
-  //
+  /**
+   * see nsIHttpServerIdentity.has
+   * @memberof ServerIdentity
+   */
   getScheme: function getScheme(host, port)
   {
     log('[' + 'registerPathHandler' + '] ' +'Start');
@@ -419,9 +486,10 @@ ServerIdentity.prototype =
     return entry[port] || '';
   },
 
-  //
-  // see nsIHttpServerIdentity.setPrimary
-  //
+  /**
+   * see nsIHttpServerIdentity.setPrimary
+   * @memberof ServerIdentity
+   */
   setPrimary: function(scheme, host, port)
   {
     this._validate(scheme, host, port);
@@ -436,10 +504,9 @@ ServerIdentity.prototype =
   // PRIVATE IMPLEMENTATION
 
   /**
-  * Initializes the primary name for the corresponding server, based on the
-  * provided port number.
-  */
-
+   * Initializes the primary name for the corresponding server, based on the
+   * provided port number.
+   */
   _initialize: function _initialize(port, host, addSecondaryDefault)
   {
     log('[' + '_initialize' + '] ' +'Start');

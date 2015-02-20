@@ -20,4 +20,6 @@ httpd.js: \
 	8-headers.js \
 	9-request.js \
 	> httpd.js
+doc: httpd.js
+	jsdoc httpd.js
 

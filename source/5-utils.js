@@ -18,7 +18,7 @@ const CR = 0x0D, LF = 0x0A;
 *   the index of the first CRLF if any were present, -1 otherwise
 */
 /** The character codes for CR and LF. */
-function findCRLF(bytes, start)
+utils.findCRLF = function(bytes, start)
 {
   for (var i = start; i < bytes.length - 1; i++)
   {
@@ -32,9 +32,10 @@ function findCRLF(bytes, start)
 }
 
 /**
-* A container which provides line-by-line access to the arrays of bytes with
-* which it is seeded.
-*/
+ * A container which provides line-by-line access to the arrays of bytes with
+ * which it is seeded.
+ * @class
+ */
 function LineData()
 {
   /** An array of queued bytes from which to get line-based characters. */
@@ -78,7 +79,7 @@ LineData.prototype =
   readLine: function readLine(out)
   {
     var data = this._data;
-    var lineEnd = findCRLF(data, this._start);
+    var lineEnd = utils.findCRLF(data, this._start);
     log('[' + 'readLine' + '] ' +'data length: ' + data.length);
     log('[' + 'readLine' + '] ' +'crlf position: ' + lineEnd);
 
@@ -137,7 +138,7 @@ LineData.prototype =
 * @returns string
 *   an HTML-safe version of str
 */
-function htmlEscape(str)
+utils.htmlEscape = function(str)
 {
   // this is naive, but it'll work
   var s = '';
@@ -151,7 +152,7 @@ function htmlEscape(str)
 /**
 * Creates a request-handling function for an nsIHttpRequestHandler object.
 */
-function createHandlerFunc(handler)
+utils.createHandlerFunc = function(handler)
 {
   return function(metadata, response) { handler.handle(metadata, response); };
 }
@@ -168,7 +169,7 @@ function createHandlerFunc(handler)
 * @throws URIError
 *   if path is incorrectly encoded
 */
-function toInternalPath(path, encoded)
+utils.toInternalPath = function(path, encoded)
 {
   if (encoded)
   {

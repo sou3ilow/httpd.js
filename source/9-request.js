@@ -1,10 +1,11 @@
 
 /**
-* A representation of the data in an HTTP request.
-*
-* @param port : uint
-*   the port on which the server receiving this request runs
-*/
+ * A representation of the data in an HTTP request.
+ *
+ * @class
+ * @param port : uint
+ *   the port on which the server receiving this request runs
+ */
 function Request(port)
 {
   /** Method of this request, e.g. GET or POST. */
@@ -145,7 +146,9 @@ Request.prototype =
     console.log(dumpStr);
   }
 };
-
+/**
+ * @class
+ */
 function StreamWrapper()
 {
   this._data = null;

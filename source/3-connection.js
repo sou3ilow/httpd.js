@@ -1,4 +1,6 @@
-
+/**
+ * @class
+ */
 function MyConnection(server, port, tcpsocket)
 {
   this.server = server;

@@ -4,6 +4,8 @@
 * response.  This includes all headers, the HTTP version, status code and
 * explanation, and the entity itself.
 *
+* @class
+*
 * @param connection : Connection
 *   the connection over which this response is to be written
 */
@@ -110,7 +112,7 @@ Response.prototype =
           }
         }
 //res:Last-Modified
-        self.setHeader('Last-Modified', toDateString(modDateTime), false);
+        self.setHeader('Last-Modified', utils.toDateString(modDateTime), false);
 //req:If-None-Match
         if (req.hasHeader('If-None-Match'))
         {
@@ -279,7 +281,7 @@ Response.prototype =
     }
     for (var i = 0; i < description.length; i++)
     {
-      if (isCTL(description.charCodeAt(i)) && description.charAt(i) != '\t')
+      if (utils.isCTL(description.charCodeAt(i)) && description.charAt(i) != '\t')
       {
         throw 'setStatusLint(): description include ctrl chars';
       }
@@ -667,7 +669,7 @@ Response.prototype =
     headers.setHeader('Server', 'httpd.js', false);
     if (!headers.hasHeader('Date'))
     {
-      headers.setHeader('Date', toDateString(Date.now()), false);
+      headers.setHeader('Date', utils.toDateString(Date.now()), false);
     }
 
     var size = 0;
@@ -808,6 +810,8 @@ Response.prototype =
 
 /**
 * Constructs an object representing an HTTP version (see section 3.1).
+*
+* @class
 *
 * @param versionString
 *   a string of the form '#.#', where # is an non-negative decimal integer with

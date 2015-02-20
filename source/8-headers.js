@@ -4,14 +4,15 @@ HttpVersion.HTTP_1_1 = new HttpVersion('1.1');
 
 
 /**
-* An object which stores HTTP headers for a request or response.
-*
-* Note that since headers are case-insensitive, this object converts headers to
-* lowercase before storing them.  This allows the getHeader and hasHeader
-* methods to work correctly for any case of a header, but it means that the
-* values returned by .enumerator may not be equal case-sensitively to the
-* values passed to setHeader when adding headers to this.
-*/
+ * An object which stores HTTP headers for a request or response.
+ *
+ * Note that since headers are case-insensitive, this object converts headers to
+ * lowercase before storing them.  This allows the getHeader and hasHeader
+ * methods to work correctly for any case of a header, but it means that the
+ * values returned by .enumerator may not be equal case-sensitively to the
+ * values passed to setHeader when adding headers to this.
+ * @class
+ */
 function HttpHeaders()
 {
   /**

@@ -21,6 +21,8 @@ const READER_FINISHED        = 3;
 * the entire body has been read, we create a Response and hand it off to the
 * ServerHandler to be given to the appropriate request handler.
 *
+* @class
+*
 * @param connection : Connection
 *   the connection for the request being read
 */
