@@ -1,22 +1,12 @@
-
-'use strict';
-
 /* Mode: JavaScript; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 */
 /* vim:set ts=2 sw=2 sts=2 et: */
-/* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-/*
-* An implementation of an HTTP server.
-*/
-
 /* jshint multistr: true */
 
-//'use strict';
 
 /** True if debugging output is enabled, false otherwise. */
 var DEBUG = false; // non-const *only* so tweakable in server tests
+
+// dblog() does not refere this any more
 var DEBUG_LOG = false;
 
 /** True if debugging output should be timestamped. */
@@ -146,11 +136,33 @@ function dumpSysTime(str)
   }
 }
 
-function dblog(msg)
-{
-  if (DEBUG_LOG) {
-    console.log('[HTTPD]:' + msg);
-  }
+var DEBUG_LEVEL_ERROR = 1; // all
+var DEBUG_LEVEL_PRINCIPAL = 2; // all
+var DEBUG_LEVEL_ALL = 5; // all
+var DEBUG_LEVEL = 1;	// 0: no message
+
+function dblog(msg) {
+	_debug_log(DEBUG_LEVEL_ALL, msg);
+}
+
+function dblog_principal(msg) {
+	_debug_log(DEBUG_LEVEL_PRINCIPAL, msg);
+}
+
+function dblog_error(msg) {
+	_debug_log(DEBUG_LEVEL_ERROR, msg);
+}
+
+function _debug_log(level, msg) {
+	var current = HttpServer.DEBUG_LEVEL;
+
+	if ( level <= current ) {
+		if ( HttpServer.logger ) {
+			HttpServer.logger(msg);
+		} else {
+			console.log(msg);
+		}
+	}
 }
 
 /**
