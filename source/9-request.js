@@ -122,6 +122,11 @@ Request.prototype =
   {
     return this._bodyInputStream.data;
   },
+
+  get body()
+  {
+    return this._bodyInputStream.data;
+  },
   
   // PRIVATE IMPLEMENTATION
 
