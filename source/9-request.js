@@ -184,7 +184,7 @@ StreamWrapper.prototype =
   {
     if (f.constructor.name !== 'RangedFile')
     {
-      log('not a ranged file !!!!');
+      dblog('not a ranged file !!!!');
     }
     this._file = f;
   },
@@ -201,7 +201,7 @@ StreamWrapper.prototype =
     var view;
     if (dataType == 'String')
     {
-      log('write String');
+      dblog('write String');
       var utf8Octets = unescape(encodeURIComponent(inputData));
 
       if (!length)
@@ -219,7 +219,7 @@ StreamWrapper.prototype =
     }
     else if (dataType == 'Uint8Array' || dataType == 'ArrayBuffer')
     {
-      log('write array/arraybuffer');
+      dblog('write array/arraybuffer');
       var data = (dataType == 'Uint8Array') ?
                   inputData : new Uint8Array(inputData);
 
@@ -234,7 +234,7 @@ StreamWrapper.prototype =
     }
     else
     {
-      log('write ranged file?:' + JSON.stringify(inputData));
+      dblog('write ranged file?:' + JSON.stringify(inputData));
       this._data = null;
       this.file = inputData;
     }

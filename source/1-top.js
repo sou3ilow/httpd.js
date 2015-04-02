@@ -146,7 +146,7 @@ function dumpSysTime(str)
   }
 }
 
-function log(msg)
+function dblog(msg)
 {
   if (DEBUG_LOG) {
     console.log('[HTTPD]:' + msg);

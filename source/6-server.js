@@ -61,16 +61,16 @@ ServerHandler.prototype =
   */
   handleResponse: function SHhandleResponse(connection)
   {
-    log('[' + 'handleResponse' + '] ' +'Start');
+    dblog('[' + 'handleResponse' + '] ' +'Start');
     var request = connection.request;
-    log('[' + 'handleResponse' + '] ' +
+    dblog('[' + 'handleResponse' + '] ' +
         'request:'+JSON.stringify(request));
     var response = new Response(connection);
-    log('[' + 'handleResponse' + '] ' +'response'+response);
+    dblog('[' + 'handleResponse' + '] ' +'response'+response);
     var path = request.path;
     dumpn('*** path == ' + path);
 
-   log('[' + 'handleResponse' + '] ' +'try...');
+   dblog('[' + 'handleResponse' + '] ' +'try...');
 
     try
     {
@@ -82,11 +82,11 @@ ServerHandler.prototype =
           // mappings, then (if the file doesn't exist) built-in server
           // default paths
           dumpn('calling override for ' + path);
-          log('[' + 'handleResponse' + '] ' +'path found in _overrides');
+          dblog('[' + 'handleResponse' + '] ' +'path found in _overrides');
           var respHandler = this;
           this._overridePaths[path](request, response,
             function(e) {
-              log('[' + 'handleResponse' + '] ' +
+              dblog('[' + 'handleResponse' + '] ' +
               '_overridePaths complete start');
               if (e instanceof HttpError) {
                 response = new Response(connection);
@@ -108,7 +108,7 @@ ServerHandler.prototype =
         }
         else
         {
-          log('[' + 'handleResponse' + '] ' +
+          dblog('[' + 'handleResponse' + '] ' +
               'else(path not found in _overrides)');
 
           var longestPrefix = '';
@@ -125,7 +125,7 @@ ServerHandler.prototype =
           {
             var handler = this;
 
-            log('[' + 'handleResponse' + '] ' +
+            dblog('[' + 'handleResponse' + '] ' +
                   'longestPrefix =' + longestPrefix);
             dumpn('calling prefix override for ' + longestPrefix);
             this._overridePrefixes[longestPrefix](request,
@@ -153,7 +153,7 @@ ServerHandler.prototype =
           }
           else
           {
-            log('[' + 'handleResponse' + '] ' +
+            dblog('[' + 'handleResponse' + '] ' +
                 'non match prefix => 403');
             throw HTTP_403;
           }
@@ -163,14 +163,14 @@ ServerHandler.prototype =
       {
         if (!(e instanceof HttpError))
         {
-          log('[' + 'handleResponse' + '] ' +
+          dblog('[' + 'handleResponse' + '] ' +
               'unexpected error(not http):' + e);
           dumpn('*** unexpected error: e == ' + e);
           throw HTTP_500;
         }
         if (e.code !== 404)
         {
-          log('[' + 'handleResponse' + '] ' +'404');
+          dblog('[' + 'handleResponse' + '] ' +'404');
           throw e;
         }
 
@@ -209,7 +209,7 @@ ServerHandler.prototype =
       return;
       }
     }
-    log('[' + 'handleResponse' + '] ' +'End: handleResponse');
+    dblog('[' + 'handleResponse' + '] ' +'End: handleResponse');
   },
 
   //
@@ -223,7 +223,7 @@ ServerHandler.prototype =
       throw 'Cr.8888 NS_ERROR_INVALID_ARG';
     }
 
-    log('[' + 'registerPathHandler' + '] ' +'call _handlerToField');
+    dblog('[' + 'registerPathHandler' + '] ' +'call _handlerToField');
     this._handlerToField(handler, this._overridePaths, path);
   },
 
@@ -260,7 +260,7 @@ ServerHandler.prototype =
         {
           if (xhr.status == 200)
           {
-            log('registerAppDirectory readFile successCb');
+            dblog('registerAppDirectory readFile successCb');
             
             var installDateTime;
             var request = window.navigator.mozApps.getSelf();
@@ -294,7 +294,7 @@ ServerHandler.prototype =
       }
       catch (e)
       {
-        log('[' + 'registerAppDirectory' + '] ' +
+        dblog('[' + 'registerAppDirectory' + '] ' +
             'Could not access the file:' + fpath);
         errorCb(HTTP_404);
       }
@@ -316,7 +316,7 @@ ServerHandler.prototype =
 
       if (!storage)
       {
-        log('[' + 'registerSdcardDirectory' + '] ' +'No storage available!');
+        dblog('[' + 'registerSdcardDirectory' + '] ' +'No storage available!');
         errorCb(HTTP_500);
         return;
       }
@@ -325,18 +325,18 @@ ServerHandler.prototype =
       obj.onsuccess = function()
       {
         var file = obj.result;
-        log('Get the file name: ' + file.name);
-        log('Get the file lastModifiedDate: ' + file.lastModifiedDate);
+        dblog('Get the file name: ' + file.name);
+        dblog('Get the file lastModifiedDate: ' + file.lastModifiedDate);
         var dateTime = file.lastModifiedDate.getTime();
-        log('Get the file lastModifiedDate getTime: ' +
+        dblog('Get the file lastModifiedDate getTime: ' +
              file.lastModifiedDate);
         successCb(file, dateTime);
       };
       obj.onerror = function objectOnerror(e)
       {
-        log('[' + 'registerSdcardDirectory' + '] ' +
+        dblog('[' + 'registerSdcardDirectory' + '] ' +
             'Could not access the file:' + fpath);
-        log('[' + 'registerSdcardDirectory' + '] ' +
+        dblog('[' + 'registerSdcardDirectory' + '] ' +
             'Error description:' + e.target.error.name);
         errorCb(HTTP_404);
       };
@@ -363,19 +363,19 @@ ServerHandler.prototype =
     if (typeof(handler) == 'function')
     {
       dict[key] = handler;
-      log('[' + '_handlerToField' + '] ' + key +
+      dblog('[' + '_handlerToField' + '] ' + key +
           '=> a handler <' + handler.name +'>');
     }
     else if (handler)
     {
       dict[key] = utils.createHandlerFunc(handler);
-      log('[' + '_handlerToField' + '] ' + key +
+      dblog('[' + '_handlerToField' + '] ' + key +
           '=> createHanlder: handler<' + handler.name + '>');
     }
     else
     {
       delete dict[key];
-      log('[' + '_handlerToField' + '] ' + 'delete for key: ' + key);
+      dblog('[' + '_handlerToField' + '] ' + 'delete for key: ' + key);
     }
   },
 

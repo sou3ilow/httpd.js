@@ -35,7 +35,7 @@ function HttpServer()
   */
   this._doQuit = false;
 
-  log('[' + 'nsHttpServer' + '] ' + 'Finish Constructor');
+  dblog('[' + 'nsHttpServer' + '] ' + 'Finish Constructor');
 }
 
 HttpServer.prototype =
@@ -61,21 +61,21 @@ HttpServer.prototype =
   _onSocketAccepted: function()
   {
     var that = this;
-    log('[' + '_onSocketAccepted' + '] ' +'Start');
+    dblog('[' + '_onSocketAccepted' + '] ' +'Start');
     var onaccept = function onaccept(tcpsock)
     {
-      log('[' + 'onconnect' + '] ' +'Start');
+      dblog('[' + 'onconnect' + '] ' +'Start');
       var conn = new MyConnection(that, that._socket.localPort ||
                                   that._socket.port, tcpsock);
-      log('[' + 'onconnect' + '] ' +'creating request reader ');
+      dblog('[' + 'onconnect' + '] ' +'creating request reader ');
       var reader = new RequestReader(conn);
-      log('[' + 'onconnect' + '] ' +'setting _onData(tcpsock)');
+      dblog('[' + 'onconnect' + '] ' +'setting _onData(tcpsock)');
       reader._onData(tcpsock);
-      log('[' + 'onconnect' + '] ' +'done');
+      dblog('[' + 'onconnect' + '] ' +'done');
     };
 
     that._socket.onconnect = onaccept;
-    log('[' + '_onSocketAccepted' + '] ' +'End');
+    dblog('[' + '_onSocketAccepted' + '] ' +'End');
   },
 
   /**
@@ -106,15 +106,15 @@ HttpServer.prototype =
     {
       var serversocket = navigator.mozTCPSocket.listen(port, options);
 
-      log('[' + '_start' + '] ' +
+      dblog('[' + '_start' + '] ' +
           'call _identity._initialize with ' +
           'port = ' + port +
           ', host = ' + host +
           ', True');
       this._identity._initialize(port, host, true);
-      log('[' + '_start' + '] ' +'set _socket = ' + serversocket);
+      dblog('[' + '_start' + '] ' +'set _socket = ' + serversocket);
       this._socket = serversocket;
-      log('[' + '_start' + '] ' +'End');
+      dblog('[' + '_start' + '] ' +'End');
     }
     catch (e)
     {
@@ -139,7 +139,7 @@ HttpServer.prototype =
     {
       throw 'Cr.NS_ERROR_UNEXPECTED';
     }
-    log('[' + 'HSstop' + '] ' +'Start:');
+    dblog('[' + 'HSstop' + '] ' +'Start:');
     this._stopCallback = typeof callback === 'function' ?
       callback : function() { callback.onStopped(); };
     this._socket.close();
@@ -147,10 +147,10 @@ HttpServer.prototype =
 
     // We can't have this identity any more, and the port on which we're running
     // this server now could be meaningless the next time around.
-    log('[' + 'HSstop' + '] ' +'this._identity._teardown()');
+    dblog('[' + 'HSstop' + '] ' +'this._identity._teardown()');
     this._identity._teardown();
     this._doQuit = false;
-    log('[' + 'HSstop' + '] ' +'done');
+    dblog('[' + 'HSstop' + '] ' +'done');
     // socket-close notification and pending request completion happen async
   },
 
@@ -171,13 +171,13 @@ HttpServer.prototype =
 
     if (path == null && param == null)
     {
-      log('get() parameter error');
+      dblog('get() parameter error');
       throw 'Cr.7777 NS_ERROR_INVALID_ARG';
     }
 
     if (typeof param == 'function')
     {
-      log('get() registerPathHandler');
+      dblog('get() registerPathHandler');
       this._handler.registerPathHandler(path, param);
     }
     else if (typeof param == 'string')
@@ -185,18 +185,18 @@ HttpServer.prototype =
       var result = param.indexOf('/sdcard');
       if (result === 0)
       {
-        log('get() registerSdcardDirectory');
+        dblog('get() registerSdcardDirectory');
         this._handler.registerSdcardDirectory(path, param);
       }
       else
       {
-        log('get() registerAppDirectory');
+        dblog('get() registerAppDirectory');
         this._handler.registerAppDirectory(path, param);
       }
     }
     else
     {
-      log('get() set error data-type');
+      dblog('get() set error data-type');
       throw 'Cr.7777 NS_ERROR_INVALID_ARG';
     }
   },
@@ -234,7 +234,7 @@ HttpServer.prototype =
    */
   registerPathHandler: function registerPathHandler(path, handler)
   {
-    log('[' + 'registerPathHandler' + '] ' +
+    dblog('[' + 'registerPathHandler' + '] ' +
         'call _handler.registerPathHandler');
     this._handler.registerPathHandler(path, handler);
   },
@@ -273,7 +273,7 @@ HttpServer.prototype =
     //
     var callback = this._stopCallback;
     if (typeof callback !== 'function') {
-      log('_stopCallback not set callback');
+      dblog('_stopCallback not set callback');
       return;
     }
     this._stopCallback = null;
@@ -466,14 +466,14 @@ ServerIdentity.prototype =
    */
   getScheme: function getScheme(host, port)
   {
-    log('[' + 'registerPathHandler' + '] ' +'Start');
+    dblog('[' + 'registerPathHandler' + '] ' +'Start');
 
     this._validate('http', host, port);
 
-    log('[' + 'getScheme' + '] ' +'validating done');
+    dblog('[' + 'getScheme' + '] ' +'validating done');
     var entry = this._locations['x' + host];
 
-    log('[' + 'getScheme' + '] ' + 'End entry is: ' +
+    dblog('[' + 'getScheme' + '] ' + 'End entry is: ' +
           JSON.stringify(entry));
 
     if (!entry)
@@ -481,7 +481,7 @@ ServerIdentity.prototype =
       return '';
     }
 
-    log('[' + 'getScheme' + '] ' +'End: getScheme');
+    dblog('[' + 'getScheme' + '] ' +'End: getScheme');
 
     return entry[port] || '';
   },
@@ -509,29 +509,29 @@ ServerIdentity.prototype =
    */
   _initialize: function _initialize(port, host, addSecondaryDefault)
   {
-    log('[' + '_initialize' + '] ' +'Start');
+    dblog('[' + '_initialize' + '] ' +'Start');
 
     this._host = host;
 
     if (this._primaryPort !== -1) {
-      log('[' + '_initialize' + '] ' +'this._primaryPort !==-1');
+      dblog('[' + '_initialize' + '] ' +'this._primaryPort !==-1');
       this.add('http', host, port);
     }
     else {
-      log('[' + '_initialize' + '] ' +'else (primaryPort is not -1)');
+      dblog('[' + '_initialize' + '] ' +'else (primaryPort is not -1)');
       this.setPrimary('http', 'localhost', port);
     }
 
-    log('[' + '_initialize' + '] ' +'setting _defaultPort..');
+    dblog('[' + '_initialize' + '] ' +'setting _defaultPort..');
     this._defaultPort = port;
     // Only add this if we're being called at server startup
     if (addSecondaryDefault && host != '127.0.0.1') {
-      log('[' + '_initialize' + '] ' +
+      dblog('[' + '_initialize' + '] ' +
           'addSecondaryDefault && host != 127.0.0.1');
       this.add('http', '127.0.0.1', port);
     }
 
-    log('[' + '_initialize' + '] ' +'End');
+    dblog('[' + '_initialize' + '] ' +'End');
   },
 
   /**
@@ -544,7 +544,7 @@ ServerIdentity.prototype =
   {
     if (this._host != '127.0.0.1')
     {
-      log('[' + '_teardown' + '] ' +
+      dblog('[' + '_teardown' + '] ' +
           'this._host != 127.0.0.1 :' + this._host + ':' + this._defaultPort);
       // Not the default primary location, nothing special to do here
       this.remove('http', '127.0.0.1', this._defaultPort);
@@ -556,7 +556,7 @@ ServerIdentity.prototype =
       this._primaryHost == this._host &&
     this._primaryPort == this._defaultPort)
     {
-      log('[' + '_teardown' + '] ' +
+      dblog('[' + '_teardown' + '] ' +
           'this._primaryScheme, Host, Port:' + this._defaultPort);
       // Make sure we don't trigger the readding logic in .remove(), then remove
       // the default location.
@@ -569,7 +569,7 @@ ServerIdentity.prototype =
     }
     else
     {
-      log('[' + '_teardown' + '] ' +'else:' + this._defaultPort);
+      dblog('[' + '_teardown' + '] ' +'else:' + this._defaultPort);
       // No reason not to remove directly as it's not our primary location
       this.remove('http', this._host, this._defaultPort);
     }
@@ -585,19 +585,19 @@ ServerIdentity.prototype =
   {
     if (scheme !== 'http' && scheme !== 'https')
     {
-      log('[' + '_validate' + '] ' +'scheme:' + scheme);
+      dblog('[' + '_validate' + '] ' +'scheme:' + scheme);
       dumpn('*** server only supports http/https schemes: \'' + scheme + '\'');
       throw 'Cr.NS_ERROR_ILLEGAL_VALUE';
     }
     if (!HOST_REGEX.test(host))
     {
-      log('[' + '_validate' + '] ' +'!HOST_REGEX.test(host):' + host);
+      dblog('[' + '_validate' + '] ' +'!HOST_REGEX.test(host):' + host);
       dumpn('*** unexpected host: \'' + host + '\'');
       throw 'Cr.NS_ERROR_ILLEGAL_VALUE';
     }
     if (port < 0 || port > 65535)
     {
-      log('[' + '_validate' + '] ' +'port:' + port);
+      dblog('[' + '_validate' + '] ' +'port:' + port);
       dumpn('*** unexpected port: \'' + port + '\'');
       throw 'Cr.NS_ERROR_ILLEGAL_VALUE';
     }

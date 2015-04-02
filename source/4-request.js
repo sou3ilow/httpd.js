@@ -76,18 +76,18 @@ RequestReader.prototype =
   */
   _onInputStreamReady: function _onInputStreamReady()
   {
-    log('[' + '_onInputStreamReady' + '] ' +'Start');
+    dblog('[' + '_onInputStreamReady' + '] ' +'Start');
     var data = this._data;
     if (!data)
     {
       return;
     }
-    log('[' + '_onInputStreamReady' + '] ' +
+    dblog('[' + '_onInputStreamReady' + '] ' +
           'switch by state: ' + this._state);
     switch (this._state)
     {
       default:
-        log('[' + '_onInputStreamReady' + '] ' +'invalid state');
+        dblog('[' + '_onInputStreamReady' + '] ' +'invalid state');
         break;
 
       case READER_IN_REQUEST_LINE:
@@ -114,7 +114,7 @@ RequestReader.prototype =
         this._processBody();
         break;
     }
-    log('[' + '_onInputStreamReady' + '] ' +'done(switch by state)');
+    dblog('[' + '_onInputStreamReady' + '] ' +'done(switch by state)');
   },
 
   _onData: function _onData(tcpsock)
@@ -123,9 +123,9 @@ RequestReader.prototype =
 
     tcpsock.ondata = function tcpsockondata(evt)
     {
-      log('[' + '_onData' + '] ' +'received ' + evt.data.byteLength +
+      dblog('[' + '_onData' + '] ' +'received ' + evt.data.byteLength +
       ' bytes data');
-      //log('[' + '_onData' + '] ' +'evt: ' + JSON.stringify(evt));
+      //dblog('[' + '_onData' + '] ' +'evt: ' + JSON.stringify(evt));
 
       that._data.appendBytes(new Uint8Array(evt.data));
       that._onInputStreamReady();
@@ -142,7 +142,7 @@ RequestReader.prototype =
   */
   _processRequestLine: function _processRequestLine()
   {
-    log('[' + '_processRequestLine' + '] ' +'Start');
+    dblog('[' + '_processRequestLine' + '] ' +'Start');
 
     // Servers SHOULD ignore any empty line(s) received where a Request-Line
     // is expected (section 4.1).
@@ -150,14 +150,14 @@ RequestReader.prototype =
     var line = {};
     var readSuccess;
 
-    log('[' + '_processRequestLine' + '] ' + 'reading lines...');
+    dblog('[' + '_processRequestLine' + '] ' + 'reading lines...');
 
     while ((readSuccess = data.readLine(line)) && line.value === '')
     {
       dumpn('*** ignoring beginning blank line...');
-      log('[' + '_processRequestLine' + '] ' + readSuccess);
+      dblog('[' + '_processRequestLine' + '] ' + readSuccess);
     }
-    log('[' + '_processRequestLine' + '] ' +'done');
+    dblog('[' + '_processRequestLine' + '] ' +'done');
 
     // if we don't have a full line, wait until we do:
     if (!readSuccess)
@@ -168,9 +168,9 @@ RequestReader.prototype =
     // we have the first non-blank line
     try
     {
-      log('[' + '_processRequestLine' + '] ' + 'call parseRequestLine');
+      dblog('[' + '_processRequestLine' + '] ' + 'call parseRequestLine');
       this._parseRequestLine(line.value);
-      log('[' + '_processRequestLine' + '] ' +
+      dblog('[' + '_processRequestLine' + '] ' +
             'return from _parseRequestLine');
       this._state = READER_IN_HEADERS;
       dumpSysTime('Request, ' + this._metadata.path);
@@ -178,11 +178,11 @@ RequestReader.prototype =
     }
     catch (e)
     {
-      log('[' + '_processRequestLine' + '] ' +'catch error' + e);
+      dblog('[' + '_processRequestLine' + '] ' +'catch error' + e);
       this._handleError(e);
       return false;
     }
-    log('[' + '_processRequestLine' + '] ' +'End');
+    dblog('[' + '_processRequestLine' + '] ' +'End');
   },
 
 
@@ -198,15 +198,15 @@ RequestReader.prototype =
     // XXX things to fix here:
     //
     // - need to support RFC 2047-encoded non-US-ASCII characters
-    log('[' + '_processHeaders' + '] ' +'Start');
+    dblog('[' + '_processHeaders' + '] ' +'Start');
     try
     {
-      log('[' + '_processHeaders' + '] ' +'Start: call _parseHeaders...');
+      dblog('[' + '_processHeaders' + '] ' +'Start: call _parseHeaders...');
       var done = this._parseHeaders();
-      log('[' + '_processHeaders' + '] ' +'back from_parseHeaders');
+      dblog('[' + '_processHeaders' + '] ' +'back from_parseHeaders');
       if (done)
       {
-        log('[' + '_processHeaders' + '] ' +'parseHeaders done');
+        dblog('[' + '_processHeaders' + '] ' +'parseHeaders done');
         var request = this._metadata;
 
         // XXX this is wrong for requests with transfer-encodings applied to
@@ -217,17 +217,17 @@ RequestReader.prototype =
         dumpn('_processHeaders, Content-length=' + this._contentLength);
 
         this._state = READER_IN_BODY;
-        log('[' + '_processHeaders' + '] ' +'done');
+        dblog('[' + '_processHeaders' + '] ' +'done');
       }
       return done;
     }
     catch (e)
     {
-      log('[' + '_processHeaders' + '] ' +'catch error' + e);
+      dblog('[' + '_processHeaders' + '] ' +'catch error' + e);
       this._handleError(e);
       return false;
     }
-    log('[' + '_processHeaders' + '] ' +'End');
+    dblog('[' + '_processHeaders' + '] ' +'End');
   },
 
   /**
@@ -239,14 +239,14 @@ RequestReader.prototype =
   */
   _processBody: function _processBody()
   {
-    log('[' + '_processBody' + '] ' +'Start');
+    dblog('[' + '_processBody' + '] ' +'Start');
     NS_ASSERT(this._state == READER_IN_BODY);
 
     // XXX handle chunked transfer-coding request bodies!
 
     try
     {
-      log('[' + '_processBody' + '] ' +
+      dblog('[' + '_processBody' + '] ' +
             'this._contentLength: '+ this._contentLength);
       if (this._contentLength > 0)
       {
@@ -254,12 +254,12 @@ RequestReader.prototype =
         var count = Math.min(data.length, this._contentLength);
         dumpn('*** loading data=' + data + ' len=' + data.length +
           ' excess=' + (data.length - count));
-        log('[' + '_processBody' + '] ' +
+        dblog('[' + '_processBody' + '] ' +
               '_processBody: writting ' + count + ' bytes');
-        log('[' + '_processBody' + '] ' +data);
+        dblog('[' + '_processBody' + '] ' +data);
         this._metadata._writeBody(data, count);
         this._contentLength -= count;
-        log('[' + '_processBody' + '] ' +'_processBody: end writting');
+        dblog('[' + '_processBody' + '] ' +'_processBody: end writting');
       }
 
       dumpn('*** remaining body data len=' + this._contentLength);
@@ -287,7 +287,7 @@ RequestReader.prototype =
       this._handleError(e);
       return false;
     }
-    log('[' + '_processBody' + '] ' +'End');
+    dblog('[' + '_processBody' + '] ' +'End');
   },
 
   /**
@@ -298,7 +298,7 @@ RequestReader.prototype =
   */
   _validateRequest: function _validateRequest()
   {
-    log('[' + '_validateRequest' + '] ' +'Start');
+    dblog('[' + '_validateRequest' + '] ' +'Start');
     NS_ASSERT(this._state == READER_IN_BODY);
 
     dumpn('*** _validateRequest');
@@ -307,11 +307,11 @@ RequestReader.prototype =
     var identity = this._connection.server.identity;
     if (metadata._httpVersion.atLeast(HttpVersion.HTTP_1_1))
     {
-      log('[' + '_validateRequest' + '] ' +'In: if httpVersion check');
+      dblog('[' + '_validateRequest' + '] ' +'In: if httpVersion check');
 
       if (!headers.hasHeader('Host'))
       {
-        log('[' + '_validateRequest' + '] ' +
+        dblog('[' + '_validateRequest' + '] ' +
               'malformed HTTP/1.1 or grater');
         dumpn('*** malformed HTTP/1.1 or greater request with no Host header!');
         throw HTTP_400;
@@ -323,11 +323,11 @@ RequestReader.prototype =
       // contain enough data on its own to do this, sadly.
       if (!metadata._host)
       {
-        log('[' + '_validateRequest' + '] ' +'no host info');
+        dblog('[' + '_validateRequest' + '] ' +'no host info');
         var host, port;
         var hostPort = headers.getHeader('Host');
         var colon = hostPort.indexOf(':');
-        log('[' + '_validateRequest' + '] ' +'colon: '+colon);
+        dblog('[' + '_validateRequest' + '] ' +'colon: '+colon);
         if (colon < 0)
         {
           host = hostPort;
@@ -344,7 +344,7 @@ RequestReader.prototype =
         //     case the default port applies.
         if (!HOST_REGEX.test(host) || !/^\d*$/.test(port))
         {
-          log('[' +  '_validateRequest' + '] ' +'port check failed');
+          dblog('[' +  '_validateRequest' + '] ' +'port check failed');
           dumpn('*** malformed hostname (' + hostPort + ') in Host ' +
                 'header, 400 time');
           throw HTTP_400;
@@ -356,12 +356,12 @@ RequestReader.prototype =
         // requested URI be absolute (and thus contain the necessary
         // information), let's assume HTTP will prevail and use that.
         port = +port || 80;
-        log('[' + '_validateRequest' + '] ' +'getting scheme...');
+        dblog('[' + '_validateRequest' + '] ' +'getting scheme...');
         var scheme = identity.getScheme(host, port) ||
                      identity.getScheme('localhost', port);
         if (!scheme)
         {
-          log('[' + '_validateRequest' + '] ' +'fail to detect scheme');
+          dblog('[' + '_validateRequest' + '] ' +'fail to detect scheme');
           dumpn('*** unrecognized hostname (' + hostPort + ') in Host ' +
                 'header, 400 time');
           throw HTTP_400;
@@ -374,10 +374,10 @@ RequestReader.prototype =
     }
     else
     {
-      log('[' + '_validateRequest' + '] ' +'In: else');
+      dblog('[' + '_validateRequest' + '] ' +'In: else');
       NS_ASSERT(metadata._host === undefined,
         'HTTP/1.0 doesn\'t allow absolute paths in the request line!');
-      log('[' + '_validateRequest' + '] ' +'Start: metadata.***');
+      dblog('[' + '_validateRequest' + '] ' +'Start: metadata.***');
       metadata._scheme = identity.primaryScheme;
       metadata._host = identity.primaryHost;
       metadata._port = identity.primaryPort;
@@ -385,7 +385,7 @@ RequestReader.prototype =
 
     NS_ASSERT(identity.has(metadata._scheme, metadata._host, metadata._port),
     'must have a location we recognize by now!');
-    log('[' + '_validateRequest' + '] ' +'End');
+    dblog('[' + '_validateRequest' + '] ' +'End');
   },
 
   /**
@@ -399,7 +399,7 @@ RequestReader.prototype =
   */
   _handleError: function rr_handleError(e)
   {
-    log('[' + 'rr_handleError' + '] ' +'start');
+    dblog('[' + 'rr_handleError' + '] ' +'start');
     
     // Don't fall back into normal processing!
     this._state = READER_FINISHED;
@@ -422,7 +422,7 @@ RequestReader.prototype =
 
     // make attempted reuse of data an error
     this._data = null;
-    log('[' + 'rr_handleError' + '] ' +'call _connection processError');
+    dblog('[' + 'rr_handleError' + '] ' +'call _connection processError');
     this._connection.processError(code, this._metadata);
   },
 
@@ -435,17 +435,17 @@ RequestReader.prototype =
   */
   _handleResponse: function _handleResponse()
   {
-    log('[' + '_handleResponse' + '] ' +'Start');
-    log('[' + '_handleResponse' + '] ' +'check state: ' +
+    dblog('[' + '_handleResponse' + '] ' +'Start');
+    dblog('[' + '_handleResponse' + '] ' +'check state: ' +
         (this._state == READER_FINISHED));
     NS_ASSERT(this._state == READER_FINISHED);
 
     // We don't need the line-based data any more, so make attempted reuse an
     // error.
     this._data = null;
-    log('[' + '_handleResponse' + '] ' +'calling _connection.process..');
+    dblog('[' + '_handleResponse' + '] ' +'calling _connection.process..');
     this._connection.process(this._metadata);
-    log('[' + '_handleResponse' + '] ' +'End');
+    dblog('[' + '_handleResponse' + '] ' +'End');
   },
 
 
@@ -459,7 +459,7 @@ RequestReader.prototype =
   */
   _parseRequestLine: function _parseRequestLine(line)
   {
-    log('[' + '_parseRequestLine' + '] ' +'Start');
+    dblog('[' + '_parseRequestLine' + '] ' +'Start');
     dumpn('*** _parseRequestLine(\'' + line + '\')');
 
     var metadata = this._metadata;
@@ -467,41 +467,41 @@ RequestReader.prototype =
     // clients and servers SHOULD accept any amount of SP or HT characters
     // between fields, even though only a single SP is required (section 19.3)
     var request = line.split(/[ \t]+/);
-    log('[' + '_parseRequestLine' + '] ' +'check request line...');
+    dblog('[' + '_parseRequestLine' + '] ' +'check request line...');
     if (!request || request.length != 3)
     {
       dumpn('*** No request in line');
       throw HTTP_400;
     }
-    log('[' + '_parseRequestLine' + '] ' +'done');
+    dblog('[' + '_parseRequestLine' + '] ' +'done');
     metadata._method = request[0];
 
     // get the HTTP version
     var ver = request[2];
     var match = ver.match(/^HTTP\/(\d+\.\d+)$/);
-    log('[' + '_parseRequestLine' + '] ' +'check http version...');
+    dblog('[' + '_parseRequestLine' + '] ' +'check http version...');
     if (!match)
     {
       dumpn('*** No HTTP version in line');
       throw HTTP_400;
     }
-    log('[' + '_parseRequestLine' + '] ' +'done');
+    dblog('[' + '_parseRequestLine' + '] ' +'done');
     // determine HTTP version
     try
     {
-      log('[' + '_parseRequestLine' + '] ' +'creating HttpVersion...');
+      dblog('[' + '_parseRequestLine' + '] ' +'creating HttpVersion...');
       metadata._httpVersion = new HttpVersion(match[1]);
-      log('[' + '_parseRequestLine' + '] ' +'done');
+      dblog('[' + '_parseRequestLine' + '] ' +'done');
       if (!metadata._httpVersion.atLeast(HttpVersion.HTTP_1_0))
       {
         throw 'unsupported HTTP version';
       }
-      log('[' + '_parseRequestLine' + '] ' +'ok. supported version');
+      dblog('[' + '_parseRequestLine' + '] ' +'ok. supported version');
     }
     catch (e)
     {
       // we support HTTP/1.0 and HTTP/1.1 only
-      log('[' + '_parseRequestLine' + '] ' +'error: ' + e);
+      dblog('[' + '_parseRequestLine' + '] ' +'error: ' + e);
       throw HTTP_501;
     }
 
@@ -509,20 +509,20 @@ RequestReader.prototype =
     var fullPath = request[1];
 
     var scheme, host, port;
-    log('[' + '_parseRequestLine' + '] ' +'check path...');
+    dblog('[' + '_parseRequestLine' + '] ' +'check path...');
     if (fullPath.charAt(0) != '/')
     {
-      log('[' + '_parseRequestLine' + '] ' +'path does not start with /');
-      log('[' + '_parseRequestLine' + '] ' +'check http version...');
+      dblog('[' + '_parseRequestLine' + '] ' +'path does not start with /');
+      dblog('[' + '_parseRequestLine' + '] ' +'check http version...');
       // No absolute paths in the request line in HTTP prior to 1.1
       if (!metadata._httpVersion.atLeast(HttpVersion.HTTP_1_1))
       {
         dumpn('*** Metadata version too low');
         throw HTTP_400;
       }
-      log('[' + '_parseRequestLine' + '] ' +'done');
+      dblog('[' + '_parseRequestLine' + '] ' +'done');
     }
-    log('[' + '_parseRequestLine' + '] ' +'done(check path');
+    dblog('[' + '_parseRequestLine' + '] ' +'done(check path');
 
     var splitter = fullPath.indexOf('?');
     if (splitter < 0)
@@ -535,7 +535,7 @@ RequestReader.prototype =
       metadata._path = fullPath.substring(0, splitter);
       metadata._queryString = fullPath.substring(splitter + 1);
     }
-    log('[' + '_parseRequestLine' + '] ' +'metadata._path:', metadata._path);
+    dblog('[' + '_parseRequestLine' + '] ' +'metadata._path:', metadata._path);
 
     metadata._scheme = scheme;
     metadata._host = host;
@@ -554,7 +554,7 @@ RequestReader.prototype =
   */
   _parseHeaders: function _parseHeaders()
   {
-    log('[' + '_parseHeaders' + '] ' +'Start');
+    dblog('[' + '_parseHeaders' + '] ' +'Start');
     NS_ASSERT(this._state == READER_IN_HEADERS);
 
     dumpn('*** _parseHeaders');
@@ -567,8 +567,8 @@ RequestReader.prototype =
     var line = {};
     while (true)
     {
-      log('[' + '_parseHeaders' + '] ' +'lastName:'+lastName);
-      log('[' + '_parseHeaders' + '] ' +'lastVal:'+lastVal);
+      dblog('[' + '_parseHeaders' + '] ' +'lastName:'+lastName);
+      dblog('[' + '_parseHeaders' + '] ' +'lastVal:'+lastVal);
       dumpn('*** Last name: \'' + lastName + '\'');
       dumpn('*** Last val: \'' + lastVal + '\'');
       NS_ASSERT(!((lastVal === undefined) ^ (lastName === undefined)),
@@ -578,7 +578,7 @@ RequestReader.prototype =
 
       if (!data.readLine(line))
       {
-        log('[' + '_parseHeaders' + '] ' +'In :!data.readLine');
+        dblog('[' + '_parseHeaders' + '] ' +'In :!data.readLine');
         // save any data we have from the header we might still be processing
         this._lastHeaderName = lastName;
         this._lastHeaderValue = lastVal;
@@ -586,14 +586,14 @@ RequestReader.prototype =
       }
 
       var lineText = line.value;
-      log('[' + '_parseHeaders' + '] ' +'Req:' + lineText);
+      dblog('[' + '_parseHeaders' + '] ' +'Req:' + lineText);
       dumpn('*** Line text: \'' + lineText + '\'');
       var firstChar = lineText.charAt(0);
       
       // blank line means end of headers
       if (lineText === '')
       {
-        log('[' + '_parseHeaders' + '] ' +'lineText is empty');
+        dblog('[' + '_parseHeaders' + '] ' +'lineText is empty');
         // we're finished with the previous header
         if (lastName)
         {
@@ -603,7 +603,7 @@ RequestReader.prototype =
           }
           catch (e)
           {
-            log('[' + '_parseHeaders' + '] ' +'error: ' + e);
+            dblog('[' + '_parseHeaders' + '] ' +'error: ' + e);
             dumpn('*** setHeader threw on last header, e == ' + e);
             throw HTTP_400;
           }
@@ -619,7 +619,7 @@ RequestReader.prototype =
       }
       else if (firstChar == ' ' || firstChar == '\t')
       {
-        log('[' + '_parseHeaders' + '] ' +
+        dblog('[' + '_parseHeaders' + '] ' +
             'firstChar is whitespace or TAB');
 
         // multi-line header if we've already seen a header line
@@ -635,8 +635,8 @@ RequestReader.prototype =
       }
       else
       {
-        log('[' + '_parseHeaders' + '] ' +'else(not blank, not space)');
-        log('[' + '_parseHeaders' + '] ' +'lastName:'+lastName);
+        dblog('[' + '_parseHeaders' + '] ' +'else(not blank, not space)');
+        dblog('[' + '_parseHeaders' + '] ' +'lastName:'+lastName);
 
         // we have a new header, so set the old one (if one existed)
 
@@ -648,7 +648,7 @@ RequestReader.prototype =
         var colon = lineText.indexOf(':'); // first colon must be splitter
         if (colon < 1)
         {
-          log('[' + '_parseHeaders' + '] ' +'no colon found');
+          dblog('[' + '_parseHeaders' + '] ' +'no colon found');
           dumpn('*** No colon or missing header field-name');
           throw HTTP_400;
         }
@@ -656,13 +656,13 @@ RequestReader.prototype =
         // set header name, value (to be set in the next loop, usually)
         lastName = lineText.substring(0, colon);
         lastVal = lineText.substring(colon + 1);
-        log('[' + '_parseHeaders' + '] ' +'2nd lastName:' + lastName);
-        log('[' + '_parseHeaders' + '] ' +'2nd lastVal:' + lastVal);
+        dblog('[' + '_parseHeaders' + '] ' +'2nd lastName:' + lastName);
+        dblog('[' + '_parseHeaders' + '] ' +'2nd lastVal:' + lastVal);
       } // empty, continuation, start of header
 
-      log('[' + '_parseHeaders' + '] ' +'continute');
+      dblog('[' + '_parseHeaders' + '] ' +'continute');
     }
-    log('[' + '_parseHeaders' + '] ' +'End');
+    dblog('[' + '_parseHeaders' + '] ' +'End');
   }
 };
 

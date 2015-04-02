@@ -59,18 +59,18 @@ function Response(connection)
 
 function isUpdateModifiedSince(fileModDateTime, modifiedSinceHeaderVal)
 {
-  log('isUpdateModifiedSince fileModDateTime:' + fileModDateTime);
+  dblog('isUpdateModifiedSince fileModDateTime:' + fileModDateTime);
   
   var reqModSinceDateTime = (new Date(modifiedSinceHeaderVal)).getTime();
-  log('isUpdateModifiedSince req reqModSinceDateTime:' + reqModSinceDateTime);
+  dblog('isUpdateModifiedSince req reqModSinceDateTime:' + reqModSinceDateTime);
   if (reqModSinceDateTime != fileModDateTime)
   {
-    log('isUpdateModifiedSince return true');
+    dblog('isUpdateModifiedSince return true');
     return true;
   }
   else
   {
-    log('isUpdateModifiedSince return false');
+    dblog('isUpdateModifiedSince return false');
     return false;
   }
 }
@@ -81,7 +81,7 @@ Response.prototype =
 
   writeFileResponse: function(localPath, readFile, req, oncomplete)
   {
-    log('[writeFileResponse] ' +'Start localPath:' + localPath);
+    dblog('[writeFileResponse] ' +'Start localPath:' + localPath);
     
     var self = this;
     var fileExt = localPath.split('.').pop();
@@ -91,16 +91,16 @@ Response.prototype =
     readFile(localPath,
       function(fileObj, modDateTime)
       {
-        log('writeFileResponse modDateTime:' + modDateTime);
+        dblog('writeFileResponse modDateTime:' + modDateTime);
 //req:If-Modified-Since
         if (req.hasHeader('If-Modified-Since'))
         {
-          log('If-Modified-Since');
+          dblog('If-Modified-Since');
           var modifiedVal;
           modifiedVal = req.getHeader('If-Modified-Since');
           if(!isUpdateModifiedSince(modDateTime, modifiedVal))
           {
-              log('If-Modified-Since Response Res had not updated');
+              dblog('If-Modified-Since Response Res had not updated');
               self.setStatusLine(req.httpVersion, 304, 'Not Modified');
               self.setHeader('Content-Type', 'text/plain', false);
               oncomplete();
@@ -108,7 +108,7 @@ Response.prototype =
           }
           else
           {
-             log('If-Modified-Since Response Res had updated');
+             dblog('If-Modified-Since Response Res had updated');
           }
         }
 //res:Last-Modified
@@ -118,10 +118,10 @@ Response.prototype =
         {
           var reqEtag;
           reqEtag = req.getHeader('If-None-Match');
-          log('If-None-Match reqEtag:' + reqEtag);
+          dblog('If-None-Match reqEtag:' + reqEtag);
           if(reqEtag === String(modDateTime))
           {
-              log('If-None-Match Response Res had not updated');
+              dblog('If-None-Match Response Res had not updated');
               self.setStatusLine(req.httpVersion, 304, 'Not Modified');
               self.setHeader('Content-Type', 'text/plain', false);
               oncomplete();
@@ -129,7 +129,7 @@ Response.prototype =
           }
           else
           {
-             log('If-None-Match Response Res had updated');
+             dblog('If-None-Match Response Res had updated');
           }
         }
 //res:ETag
@@ -149,13 +149,13 @@ Response.prototype =
         var MAXSIZE = 1 * Math.pow(2, 20);
         if (MAXSIZE < f.size)
         {
-          log('file size over 1MB!!');
+          dblog('file size over 1MB!!');
           if (f.ranged)
           {
             self.setStatusLine(req.httpVersion, 206, 'Partial Content');
             var contentRange =
               'bytes ' + f.start + '-' + f.end + '/' + f.size;
-            log('[' + 'writeFileResponse' + '] ' +
+            dblog('[' + 'writeFileResponse' + '] ' +
               'content-range=' + contentRange);
             self.setHeader('Content-Range', contentRange);
           }
@@ -173,7 +173,7 @@ Response.prototype =
               self.setStatusLine(req.httpVersion, 206, 'Partial Content');
               var contentRange =
                 'bytes ' + f.start + '-' + f.end + '/' + f.size;
-              log('[' + 'writeFileResponse' + '] ' +
+              dblog('[' + 'writeFileResponse' + '] ' +
                 'content-range=' + contentRange);
               self.setHeader('Content-Range', contentRange);
             }
@@ -297,12 +297,12 @@ Response.prototype =
   {
     if (!this._headers || this._end)
     {
-      log('[' + 'setHeader' + '] ' +'condition not satisfied');
+      dblog('[' + 'setHeader' + '] ' +'condition not satisfied');
       throw 'setHeader(): condition not satisfied';
     }
     this._ensureAlive();
     this._headers.setHeader(name, value, merge);
-    log('[' + 'setHeader' + '] ' +name + '=>' + value);
+    dblog('[' + 'setHeader' + '] ' +name + '=>' + value);
   },
 
   // POST-CONSTRUCTION API (not exposed externally)
@@ -364,15 +364,15 @@ Response.prototype =
   */
   complete: function complete()
   {
-    log('[' + 'complete' + '] ' +'Start');
+    dblog('[' + 'complete' + '] ' +'Start');
 
     dumpn('*** complete()');
 
-    log('[' + 'complete' + '] ' +'calling _startAsyncProcessor');
+    dblog('[' + 'complete' + '] ' +'calling _startAsyncProcessor');
 
     this._startAsyncProcessor();
-    log('[' + 'complete' + '] ' +'done');
-    log('[' + 'complete' + '] ' +'End');
+    dblog('[' + 'complete' + '] ' +'done');
+    dblog('[' + 'complete' + '] ' +'End');
   },
 
   /**
@@ -427,9 +427,9 @@ Response.prototype =
     // asynchronously continue to send the body.
     if (this._headers)
     {
-      log('[' + '_startAsyncProcessor' + '] ' +'call  _sendHeaders');
+      dblog('[' + '_startAsyncProcessor' + '] ' +'call  _sendHeaders');
       this._sendHeaders();
-      log('[' + '_startAsyncProcessor' + '] ' +'done.');
+      dblog('[' + '_startAsyncProcessor' + '] ' +'done.');
       return;
     }
 
@@ -451,7 +451,7 @@ Response.prototype =
     // argument of send() is ArrayBuffer
     if (type === 'string')
     {
-      log('_sending string ' + data.length + ' chars');
+      dblog('_sending string ' + data.length + ' chars');
       var abuff = new ArrayBuffer(data.length);
       var view = new Uint8Array(abuff);
 
@@ -464,13 +464,13 @@ Response.prototype =
     }
     else if (type === 'RangedFile')
     {
-      log('_sending RangedFile');
+      dblog('_sending RangedFile');
       this._sendFile(tcpsock, data);
       return true;
     }
     else
     {
-      log('_sending ' + type);
+      dblog('_sending ' + type);
       this._sendData(tcpsock, data);
       return false;
     }
@@ -478,7 +478,7 @@ Response.prototype =
   
   _sendData: function(sock, data)
   {
-    log('_sendData sock.readyState:' + sock.readyState);
+    dblog('_sendData sock.readyState:' + sock.readyState);
     if (sock.readyState === 'open')
     {
       sock.send(data);
@@ -494,7 +494,7 @@ Response.prototype =
   {
 
     const UNIT_SIZE = Math.pow(2, 16);
-    log('_sendFile sock.readyState:' + sock.readyState);
+    dblog('_sendFile sock.readyState:' + sock.readyState);
     if (sock.readyState !== 'open')
     {
       if (rangedFile != null)
@@ -508,7 +508,7 @@ Response.prototype =
     var size = rangedFile.end + 1;
     var self = this;
     var times = Math.ceil(size / UNIT_SIZE);
-    log('_sendFile times:' + times);
+    dblog('_sendFile times:' + times);
     var count = 0;
     var reader = new FileReader();
     log ('_sendFile (type)' + rangedFile.constructor.name);
@@ -517,10 +517,10 @@ Response.prototype =
     var timeoutId = null;
     var sendUnit = function()
     {
-      log('sendUnit spos:' + spos + ' size:' + size);
+      dblog('sendUnit spos:' + spos + ' size:' + size);
       if (spos >= size)
       {
-        log('sendUnit no more data');
+        dblog('sendUnit no more data');
         self.end();
         releaseRangedFile();
         abortFileReader();
@@ -531,21 +531,21 @@ Response.prototype =
       }
       cancelTimeoutClose();
       var end = Math.min(spos + UNIT_SIZE, size);
-      log('sendUnit ' +
+      dblog('sendUnit ' +
         (count++) + '/' + times +
         ' range = ' + spos + '-' + end + ' total = ' + size);
       if (rangedFile == null || reader == null)
       {
-        log('sendUnit null check end');
+        dblog('sendUnit null check end');
         return;
       }
       pieceofFile = rangedFile.file.slice(spos, end);
       reader.onload = function onload(e)
       {
-        log('sendUnit reader onload');
+        dblog('sendUnit reader onload');
         spos = end;
         var sendret = self._sendData(sock, reader.result);
-        log('sendUnit _sendData sendret:' + sendret);
+        dblog('sendUnit _sendData sendret:' + sendret);
         if (sendret === false)
         {
           releaseRangedFile();
@@ -553,7 +553,7 @@ Response.prototype =
         }
         if (spos >= size)
         {
-          log('sendUnit no more data');
+          dblog('sendUnit no more data');
           self.end();
           releaseRangedFile();
           abortFileReader();
@@ -567,7 +567,7 @@ Response.prototype =
       };
       reader.onabort = function onabort(e)
       {
-        log('reader onabort');
+        dblog('reader onabort');
         self.end();
         releaseRangedFile();
         reader = null;
@@ -579,7 +579,7 @@ Response.prototype =
 
     sock.onclose  = function(evt)
     {
-      log('sock onclose');
+      dblog('sock onclose');
       self.end();
       releaseRangedFile();
       abortFileReader();
@@ -588,7 +588,7 @@ Response.prototype =
     };
     sock.onerror  = function(evt)
     {
-      log('sock onerror');
+      dblog('sock onerror');
       self.end();
       releaseRangedFile();
       abortFileReader();
@@ -597,7 +597,7 @@ Response.prototype =
     };
     var timeoutClose = function()
     {
-      log('timeoutClose');
+      dblog('timeoutClose');
       self.end();
       releaseRangedFile();
       abortFileReader();
@@ -608,7 +608,7 @@ Response.prototype =
     
     var cancelTimeoutClose = function()
     {
-      log('cancelTimeoutClose timeoutId:' + timeoutId);
+      dblog('cancelTimeoutClose timeoutId:' + timeoutId);
       if (timeoutId != null) {
          clearTimeout(timeoutId);
          timeoutId = null;
@@ -617,7 +617,7 @@ Response.prototype =
     
     var releaseRangedFile = function()
     {
-      log('releaseRangedFile');
+      dblog('releaseRangedFile');
       if (rangedFile != null)
       {
         rangedFile.file = null;
@@ -627,11 +627,11 @@ Response.prototype =
 
     var abortFileReader = function()
     {
-      log('abortFileReader');
+      dblog('abortFileReader');
       if (reader != null &&
           reader.readyState == FileReader.LOADING)
       {
-        log('abortFileReader reader.abort()');
+        dblog('abortFileReader reader.abort()');
         reader.abort();
       }
       reader = null;
@@ -640,7 +640,7 @@ Response.prototype =
     sock.ondrain = sendUnit;
     sendUnit();
 
-    log('_sendFile end');
+    dblog('_sendFile end');
   },
 
   /**
@@ -652,7 +652,7 @@ Response.prototype =
   */
   _sendHeaders: function _sendHeaders()
   {
-    log('[' + '_sendHeaders' + '] ' +'start');
+    dblog('[' + '_sendHeaders' + '] ' +'start');
 
     dumpn('*** _sendHeaders()');
 
@@ -675,9 +675,9 @@ Response.prototype =
     var size = 0;
     if (this._bodyInputStream != null)
     {
-      log('[' + '_sendHeaders' + '] ' +'body size ' +
+      dblog('[' + '_sendHeaders' + '] ' +'body size ' +
           this._bodyInputStream.size + ' data: ');
-      log('[' + '_sendHeaders' + '] ' +this._bodyInputStream.data);
+      dblog('[' + '_sendHeaders' + '] ' +this._bodyInputStream.data);
 
       size = this._bodyInputStream.size;
     }
@@ -698,7 +698,7 @@ Response.prototype =
 
     // send headers
     this._send(preambleData.join('\r\n'));
-    log('[' + '_sendHeaders' + '] ' +'header: ' +
+    dblog('[' + '_sendHeaders' + '] ' +'header: ' +
         preambleData.join(', '));
     // send body (if exists)
     this._sendBody();
@@ -722,7 +722,7 @@ Response.prototype =
   _sendBody: function _sendBody()
   {
     dumpn('*** _sendBody');
-    log('[' + '_sendBody' + '] ' +'Start: sendBody');
+    dblog('[' + '_sendBody' + '] ' +'Start: sendBody');
 
     // If no body data was written, we're done
     if (!this._bodyInputStream)
@@ -737,25 +737,25 @@ Response.prototype =
     {
       if (this._bodyInputStream.data)
       {
-        log(' has data(array buffer)');
+        dblog(' has data(array buffer)');
         socketClosedByFunc = this._send(this._bodyInputStream.data);
       }
       else
       {
-        log('file:' + JSON.stringify(this._bodyInputStream.file));
+        dblog('file:' + JSON.stringify(this._bodyInputStream.file));
         socketClosedByFunc = this._send(this._bodyInputStream.file);
       }
     }
     if (!socketClosedByFunc)
     {
-      log('sendbody: closing socket');
+      dblog('sendbody: closing socket');
       this.end();
     }
     else{
-      log('sendbody: socket kept');
+      dblog('sendbody: socket kept');
     }
 
-    log('[' + '_sendBody' + '] ' +'End: sendBody');
+    dblog('[' + '_sendBody' + '] ' +'End: sendBody');
 
   },
 

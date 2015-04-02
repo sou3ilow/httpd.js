@@ -43,11 +43,11 @@ HttpHeaders.prototype =
   */
   setHeader: function setHeader(fieldName, fieldValue, merge)
   {
-    log('[' + 'setHeader' + '] ' +'Start');
+    dblog('[' + 'setHeader' + '] ' +'Start');
 
     var name = headerUtils.normalizeFieldName(fieldName);
     var value = headerUtils.normalizeFieldValue(fieldValue);
-    log('[' + 'setHeader' + '] ' +' ('+ name + ' => ' + value + ')');
+    dblog('[' + 'setHeader' + '] ' +' ('+ name + ' => ' + value + ')');
 
     // The following three headers are stored as arrays because their real-world
     // syntax prevents joining individual headers into a single header using
@@ -72,7 +72,7 @@ HttpHeaders.prototype =
     {
       this._headers[name] = [value];
     }
-    log('[' + 'setHeader' + '] ' +'End');
+    dblog('[' + 'setHeader' + '] ' +'End');
 
   },
 

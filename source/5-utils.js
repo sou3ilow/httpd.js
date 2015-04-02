@@ -80,8 +80,8 @@ LineData.prototype =
   {
     var data = this._data;
     var lineEnd = utils.findCRLF(data, this._start);
-    log('[' + 'readLine' + '] ' +'data length: ' + data.length);
-    log('[' + 'readLine' + '] ' +'crlf position: ' + lineEnd);
+    dblog('[' + 'readLine' + '] ' +'data length: ' + data.length);
+    dblog('[' + 'readLine' + '] ' +'crlf position: ' + lineEnd);
 
     if (length < 0)
     {
@@ -102,8 +102,8 @@ LineData.prototype =
                                          data.subarray(this._start, lineEnd));
 
     this._start = lineEnd + 2;
-    log('[' + 'readLine' + '] ' +'start:' + this._start);
-    log('[' + 'readLine' + '] ' +'line: ' + line);
+    dblog('[' + 'readLine' + '] ' +'start:' + this._start);
+    dblog('[' + 'readLine' + '] ' +'line: ' + line);
 
     out.value = line;
     return true;
@@ -119,7 +119,7 @@ LineData.prototype =
   {
     var data = this._data.subarray(this._start, this._data.length);
 
-    log('[' + 'readLine' + '] ' +
+    dblog('[' + 'readLine' + '] ' +
         'purge(): data.length=' + data.length);
     this._data = null;
     this._start = 0;
@@ -180,7 +180,7 @@ utils.toInternalPath = function(path, encoded)
   for (var i = 0, sz = comps.length; i < sz; i++)
   {
     var comp = comps[i];
-    log('toInternalPath comps[' + i + ']:' + comp);
+    dblog('toInternalPath comps[' + i + ']:' + comp);
   }
   return comps.join('/');
 }
@@ -219,7 +219,7 @@ function RangedFile(file, ranged, size, start, end)
   this.size = size;
   this.start = start;
   this.end = end;
-  log('RangedFile ranged:' + ranged +
+  dblog('RangedFile ranged:' + ranged +
                 ' size:' + size +
                 ' start:' + start+
                 ' end:' + end);
@@ -238,9 +238,9 @@ function sliceFile(rangeHeader, file)
     // bytes=[start]-[end]
     start = (mat[1] !== undefined) ? parseInt(mat[1]) : undefined;
     end   = (mat[2] !== undefined) ? parseInt(mat[2]) : undefined;
-    log('sliceFile fsize:' + fsize);
-    log('sliceFile start:' + start);
-    log('sliceFile end  :' + end);
+    dblog('sliceFile fsize:' + fsize);
+    dblog('sliceFile start:' + start);
+    dblog('sliceFile end  :' + end);
     if (start === undefined && end === undefined)
     {
       // bytes=-
@@ -293,7 +293,7 @@ function writeFileResponseFactory(path, dir, readFile)
     res.writeFileResponse(localPath, readFile, req, oncomplete);
   }
 
-  log('[' + 'readLine' + '] ' +'End');
+  dblog('[' + 'readLine' + '] ' +'End');
   return writeResponse;
 }
 
