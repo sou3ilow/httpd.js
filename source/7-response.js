@@ -241,7 +241,9 @@ Response.prototype =
     this.bodyOutputStream.write(data);
   },
 
-  //send: write, // alias 
+  send: function() {
+ 	this.write.apply(this, arguments); // alias
+  },
 
   setStatusLine: function(httpVersion, code, description)
   {
