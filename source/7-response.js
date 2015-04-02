@@ -229,6 +229,7 @@ Response.prototype =
     return this._bodyOutputStream;
   },
 
+
   write: function(data)
   {
     if (this._end)
@@ -239,6 +240,8 @@ Response.prototype =
     // data is 'string' or 'uint8Array'.
     this.bodyOutputStream.write(data);
   },
+
+  send: write, // alias 
 
   setStatusLine: function(httpVersion, code, description)
   {
