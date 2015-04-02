@@ -200,6 +200,10 @@ HttpServer.prototype =
       throw 'Cr.7777 NS_ERROR_INVALID_ARG';
     }
   },
+
+  post: function() {
+  	this.get.apply(this, arguments); // alias
+  },
  
   /**
    * register subdirectry of app
