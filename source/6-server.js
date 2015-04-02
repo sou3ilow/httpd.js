@@ -65,8 +65,12 @@ ServerHandler.prototype =
     var request = connection.request;
     dblog('[' + 'handleResponse' + '] ' +
         'request:'+JSON.stringify(request));
+    dblog_principal('rq: ' + request.originalURL);
+
+
     var response = new Response(connection);
     dblog('[' + 'handleResponse' + '] ' +'response'+response);
+
     var path = request.path;
     dumpn('*** path == ' + path);
 

@@ -17,6 +17,20 @@ function Request(port)
   /** Query string, if any, associated with this request (not including '?'). */
   this._queryString = '';
 
+  /**
+   * e.g. 
+   * /search?q=aaa
+   */
+  this._originalURL = '';
+
+  /**
+   * e.g.
+   * 	req.query.v1
+   * 	req.query.v2 ...
+   */
+  this._query = null;
+
+
   /** Scheme of requested resource, usually http, always lowercase. */
   this._scheme = 'http';
 
@@ -81,6 +95,16 @@ Request.prototype =
   {
     return this._queryString;
   },
+
+  get query()
+  {
+  	return this._query || {}
+  },
+
+  get originalURL() {
+  	return this._originalURL;
+  },
+
   // HEADERS
   getHeader: function(name)
   {

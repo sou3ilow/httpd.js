@@ -703,8 +703,7 @@ Response.prototype =
 
     // send headers
     this._send(preambleData.join('\r\n'));
-    dblog_principal('[' + '_sendHeaders' + '] ' +'header: ' +
-        preambleData.join(', '));
+    dblog_principal('st:' + preambleData[0]);
     // send body (if exists)
     this._sendBody();
 

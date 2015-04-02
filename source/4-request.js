@@ -507,6 +507,7 @@ RequestReader.prototype =
 
 
     var fullPath = request[1];
+	metadata._originalURL = fullPath;
 
     var scheme, host, port;
     dblog('[' + '_parseRequestLine' + '] ' +'check path...');
@@ -524,6 +525,7 @@ RequestReader.prototype =
     }
     dblog('[' + '_parseRequestLine' + '] ' +'done(check path');
 
+
     var splitter = fullPath.indexOf('?');
     if (splitter < 0)
     {
@@ -533,7 +535,19 @@ RequestReader.prototype =
     else
     {
       metadata._path = fullPath.substring(0, splitter);
-      metadata._queryString = fullPath.substring(splitter + 1);
+	  var queryString = fullPath.substring(splitter + 1);
+      metadata._queryString = queryString;
+
+	  // set query
+	  var qs = queryString.split('&');
+	  if ( 0 < qs.length ) {
+	  	metadata._query = {}; // init
+	  	for ( var i=0; i<qs.length; i++ ) {
+			var q = qs[i].split('=');
+			var v = q[1]; if ( v === undefined ) { v = null; }
+			metadata._query[q[0]] = v;
+		}
+	  }
     }
     dblog('[' + '_parseRequestLine' + '] ' +'metadata._path:', metadata._path);
 
