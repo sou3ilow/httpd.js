@@ -167,7 +167,7 @@ ServerHandler.prototype =
       {
         if (!(e instanceof HttpError))
         {
-          dblog_error('500 ' + e);
+          dblog_error('500 ' + e + ' stack' + e.stack);
           dumpn('*** unexpected error: e == ' + e);
           throw HTTP_500;
         }
